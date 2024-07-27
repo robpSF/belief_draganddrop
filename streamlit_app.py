@@ -219,8 +219,26 @@ if uploaded_file:
             }}
 
             document.addEventListener('DOMContentLoaded', updateTable);
+
+            function transferDataToStreamlit() {{
+                const updatedData = JSON.stringify(filtered_df);
+                fetch('/transferred_data', {{
+                    method: 'POST',
+                    headers: {{
+                        'Content-Type': 'application/json'
+                    }},
+                    body: updatedData
+                }}).then(response => response.json()).then(data => {{
+                    if (data.success) {{
+                        alert("Data transferred successfully!");
+                    }} else {{
+                        alert("Data transfer failed!");
+                    }}
+                }});
+            }}
         </script>
 
+        <button onclick="transferDataToStreamlit()">Transfer Data to Streamlit</button>
         <div id="updatedTable" style="margin-top: 20px;"></div>
 
         </body>
@@ -230,26 +248,32 @@ if uploaded_file:
         # Display the drag-and-drop HTML/JS
         components.html(drag_drop_html, height=1200)
 
-        # Convert the updated data to a downloadable Excel file
-        def to_excel(df):
-            output = io.BytesIO()
-            writer = pd.ExcelWriter(output, engine='xlsxwriter')
-            df.to_excel(writer, index=False, sheet_name='Sheet1')
-            writer.close()
-            processed_data = output.getvalue()
-            return processed_data
+        # Capture the transferred data from JavaScript
+        if 'filtered_df' not in st.session_state:
+            st.session_state['filtered_df'] = filtered_df.to_json(orient='records')
 
-        # Ensure that the filtered dataframe is being updated properly
-        def get_updated_filtered_df(filtered_df):
-            return pd.DataFrame(filtered_df)
+        @st.experimental_singleton
+        def get_updated_filtered_df():
+            updated_json = st.session_state['filtered_df']
+            updated_filtered_df = pd.read_json(updated_json)
+            return updated_filtered_df
 
-        updated_filtered_df = get_updated_filtered_df(filtered_df)
-        updated_table = updated_filtered_df[['Handle', 'Name', 'Faction', 'Beliefs']]
-        excel_data = to_excel(updated_table)
+        # Button to transfer data from JavaScript to Streamlit
+        if st.button("Transfer Data to Streamlit"):
+            st.session_state['filtered_df'] = st.experimental_rerun()['data']
 
-        st.download_button(
-            label="Download Updated Data",
-            data=excel_data,
-            file_name='updated_data.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        # Display the updated dataframe
+        if 'filtered_df' in st.session_state:
+            updated_filtered_df = get_updated_filtered_df()
+            st.write("Updated Data:", updated_filtered_df)
+
+            # Create the updated table with Handle, Name, Faction, and Beliefs columns
+            updated_table = updated_filtered_df[['Handle', 'Name', 'Faction', 'Beliefs']]
+            excel_data = to_excel(updated_table)
+
+            st.download_button(
+                label="Download Updated Data",
+                data=excel_data,
+                file_name='updated_data.xlsx',
+                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
