@@ -53,21 +53,25 @@ drag_drop_html = f"""
             left: -80px;
             top: 50%;
             transform: translateY(-50%);
+            text-align: left;
         }}
         #belief1_right {{
             right: -80px;
             top: 50%;
             transform: translateY(-50%);
+            text-align: right;
         }}
         #belief2_top {{
             top: -30px;
             left: 50%;
             transform: translateX(-50%);
+            text-align: center;
         }}
         #belief2_bottom {{
             bottom: -30px;
             left: 50%;
             transform: translateX(-50%);
+            text-align: center;
         }}
     </style>
 </head>
