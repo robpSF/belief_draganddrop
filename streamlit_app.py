@@ -220,7 +220,13 @@ if uploaded_file:
 
             function updateSessionState() {{
                 // Send updated filtered_df back to Streamlit
-                window.parent.postMessage({{filtered_df: JSON.stringify(filtered_df)}}, "*");
+                fetch("/updated_data", {{
+                    method: "POST",
+                    headers: {{
+                        "Content-Type": "application/json"
+                    }},
+                    body: JSON.stringify(filtered_df)
+                }});
             }}
 
             document.addEventListener('DOMContentLoaded', updateTable);
@@ -232,12 +238,24 @@ if uploaded_file:
         </html>
         """
 
-        # Display the drag-and-drop HTML/JS
-        components.html(drag_drop_html, height=1200)
+        # Define the custom component for receiving updates from the frontend
+        def custom_component(js_code):
+            custom_component = components.declare_component(
+                "custom_component",
+                path="."
+            )
+            return custom_component(js_code=js_code)
 
-        # Update session state with data from the frontend
-        if 'filtered_df' in st.session_state:
-            filtered_df = pd.DataFrame(st.session_state.filtered_df)
+        # Custom component to handle updates
+        custom_component(drag_drop_html)
+
+        # Process the received data and update the session state
+        def handle_updates():
+            data = st.experimental_get_query_params().get("data")
+            if data:
+                st.session_state.filtered_df = pd.read_json(data[0], orient='records')
+
+        handle_updates()
 
         # Convert the updated data to a downloadable Excel file
         def to_excel(df):
@@ -248,7 +266,8 @@ if uploaded_file:
             processed_data = output.getvalue()
             return processed_data
 
-        excel_data = to_excel(filtered_df)
+        updated_df = pd.DataFrame(st.session_state.filtered_df)
+        excel_data = to_excel(updated_df)
 
         st.download_button(
             label="Download Updated Data",
