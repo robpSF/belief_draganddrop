@@ -239,8 +239,12 @@ if uploaded_file:
             processed_data = output.getvalue()
             return processed_data
 
-        # Create the updated table with Handle, Name, Faction, and Beliefs columns
-        updated_table = pd.DataFrame(filtered_df)[['Handle', 'Name', 'Faction', 'Beliefs']]
+        # Ensure that the filtered dataframe is being updated properly
+        def get_updated_filtered_df(filtered_df):
+            return pd.DataFrame(filtered_df)
+
+        updated_filtered_df = get_updated_filtered_df(filtered_df)
+        updated_table = updated_filtered_df[['Handle', 'Name', 'Faction', 'Beliefs']]
         excel_data = to_excel(updated_table)
 
         st.download_button(
