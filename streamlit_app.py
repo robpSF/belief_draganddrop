@@ -73,16 +73,19 @@ if uploaded_file:
                     text-align: center;
                     background-color: #f9f9f9;
                     min-height: 200px;
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    grid-template-rows: repeat(3, auto);
+                    gap: 10px;
                 }}
                 .draggable {{
                     padding: 5px;
-                    margin: 5px;
                     background-color: #007bff;
                     color: #fff;
                     border-radius: 5px;
                     cursor: move;
-                    width: 70px;
                     text-align: center;
+                    display: inline-block;
                 }}
                 .label {{
                     position: absolute;
@@ -129,7 +132,9 @@ if uploaded_file:
             <div id="belief2_bottom" class="label">{belief2_bottom}</div>
         </div>
 
-        {draggable_items_html}
+        <div style="margin-top: 20px;">
+            {draggable_items_html}
+        </div>
 
         <script>
             function allowDrop(event) {{
