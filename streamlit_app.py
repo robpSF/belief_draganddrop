@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import io
+import json
 
 # Title of the app
 st.title("Drag and Drop Quadrant with Custom Axes")
@@ -222,22 +223,11 @@ if uploaded_file:
 
             function transferDataToStreamlit() {{
                 const updatedData = JSON.stringify(filtered_df);
-                fetch('/transferred_data', {{
-                    method: 'POST',
-                    headers: {{
-                        'Content-Type': 'application/json'
-                    }},
-                    body: updatedData
-                }}).then(response => response.json()).then(data => {{
-                    if (data.success) {{
-                        alert("Data transferred successfully!");
-                    }} else {{
-                        alert("Data transfer failed!");
-                    }}
-                }});
+                document.getElementById("transferred_data").value = updatedData;
             }}
         </script>
 
+        <input type="hidden" id="transferred_data" name="transferred_data">
         <button onclick="transferDataToStreamlit()">Transfer Data to Streamlit</button>
         <div id="updatedTable" style="margin-top: 20px;"></div>
 
@@ -248,23 +238,15 @@ if uploaded_file:
         # Display the drag-and-drop HTML/JS
         components.html(drag_drop_html, height=1200)
 
-        # Capture the transferred data from JavaScript
-        if 'filtered_df' not in st.session_state:
-            st.session_state['filtered_df'] = filtered_df.to_json(orient='records')
-
-        @st.experimental_singleton
-        def get_updated_filtered_df():
-            updated_json = st.session_state['filtered_df']
-            updated_filtered_df = pd.read_json(updated_json)
-            return updated_filtered_df
-
-        # Button to transfer data from JavaScript to Streamlit
+        # Button to trigger the data transfer
         if st.button("Transfer Data to Streamlit"):
-            st.session_state['filtered_df'] = st.experimental_rerun()['data']
+            transferred_data = st.text_area("Paste the transferred data here")
+            if transferred_data:
+                st.session_state['filtered_df'] = transferred_data
 
         # Display the updated dataframe
         if 'filtered_df' in st.session_state:
-            updated_filtered_df = get_updated_filtered_df()
+            updated_filtered_df = pd.read_json(st.session_state['filtered_df'])
             st.write("Updated Data:", updated_filtered_df)
 
             # Create the updated table with Handle, Name, Faction, and Beliefs columns
@@ -277,3 +259,12 @@ if uploaded_file:
                 file_name='updated_data.xlsx',
                 mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
+
+# Function to convert the updated data to a downloadable Excel file
+def to_excel(df):
+    output = io.BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    writer.close()
+    processed_data = output.getvalue()
+    return processed_data
