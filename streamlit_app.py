@@ -230,7 +230,7 @@ if uploaded_file:
             output = io.BytesIO()
             writer = pd.ExcelWriter(output, engine='xlsxwriter')
             df.to_excel(writer, index=False, sheet_name='Sheet1')
-            writer.save()
+            writer.close()
             processed_data = output.getvalue()
             return processed_data
 
