@@ -239,15 +239,9 @@ if uploaded_file:
             processed_data = output.getvalue()
             return processed_data
 
-        updated_df = pd.DataFrame(filtered_df)
-
-        # Merge updated beliefs back into the original dataframe using the Handle column
-        df.set_index('Handle', inplace=True)
-        updated_df.set_index('Handle', inplace=True)
-        df.update(updated_df[['Beliefs']])
-        df.reset_index(inplace=True)
-
-        excel_data = to_excel(df)
+        # Create the updated table with Handle, Name, Faction, and Beliefs columns
+        updated_table = pd.DataFrame(filtered_df)[['Handle', 'Name', 'Faction', 'Beliefs']]
+        excel_data = to_excel(updated_table)
 
         st.download_button(
             label="Download Updated Data",
