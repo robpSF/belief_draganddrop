@@ -57,6 +57,10 @@ if uploaded_file:
         <html>
         <head>
             <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    font-size: 9pt;
+                }}
                 .container {{
                     display: grid;
                     grid-template-columns: 1fr 1fr;
@@ -89,7 +93,7 @@ if uploaded_file:
                 }}
                 .label {{
                     position: absolute;
-                    font-size: 14px;
+                    font-size: 9pt;
                     font-weight: bold;
                 }}
                 #belief1_left {{
