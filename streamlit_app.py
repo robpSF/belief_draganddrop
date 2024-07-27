@@ -2,7 +2,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import io
-import json
 
 # Title of the app
 st.title("Drag and Drop Quadrant with Custom Axes")
@@ -46,10 +45,9 @@ if uploaded_file:
         for index, row in filtered_df.iterrows():
             item_id = f"item{index}"
             name = row["Name"]
-            handle = row["Handle"]
             image_url = row["Image"]
             draggable_items_html += f"""
-            <div class="draggable" draggable="true" ondragstart="drag(event)" id="{item_id}" data-handle="{handle}">
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="{item_id}">
                 <img src="{image_url}" alt="{name}" width="50" height="50"><br>{name}
             </div>
             """
@@ -186,22 +184,19 @@ if uploaded_file:
                         element.style.backgroundColor = '#ff0000';
                         break;
                 }}
-                updateBeliefs(element.dataset.handle, beliefs);
+                updateBeliefs(element.id, beliefs);
             }}
 
-            function updateBeliefs(handle, beliefs) {{
-                const itemIndex = filtered_df.findIndex(row => row.Handle === handle);
-                if (itemIndex !== -1) {{
-                    filtered_df[itemIndex].Beliefs = beliefs;
-                    updateTable();
-                }}
+            function updateBeliefs(itemId, beliefs) {{
+                const itemIndex = parseInt(itemId.replace('item', ''), 10);
+                filtered_df[itemIndex].Beliefs = beliefs;
+                updateTable();
             }}
 
             function updateTable() {{
                 const tableDiv = document.getElementById('updatedTable');
                 let tableHTML = `<table>
                     <tr>
-                        <th>Handle</th>
                         <th>Name</th>
                         <th>Faction</th>
                         <th>Beliefs</th>
@@ -209,7 +204,6 @@ if uploaded_file:
                 filtered_df.forEach(row => {{
                     tableHTML += `
                         <tr>
-                            <td>${{row.Handle}}</td>
                             <td>${{row.Name}}</td>
                             <td>${{row.Faction}}</td>
                             <td>${{row.Beliefs}}</td>
@@ -220,15 +214,8 @@ if uploaded_file:
             }}
 
             document.addEventListener('DOMContentLoaded', updateTable);
-
-            function transferDataToStreamlit() {{
-                const updatedData = JSON.stringify(filtered_df);
-                document.getElementById("transferred_data").value = updatedData;
-            }}
         </script>
 
-        <input type="hidden" id="transferred_data" name="transferred_data">
-        <button onclick="transferDataToStreamlit()">Transfer Data to Streamlit</button>
         <div id="updatedTable" style="margin-top: 20px;"></div>
 
         </body>
@@ -238,33 +225,21 @@ if uploaded_file:
         # Display the drag-and-drop HTML/JS
         components.html(drag_drop_html, height=1200)
 
-        # Button to trigger the data transfer
-        if st.button("Transfer Data to Streamlit"):
-            transferred_data = st.text_area("Paste the transferred data here")
-            if transferred_data:
-                st.session_state['filtered_df'] = transferred_data
+        # Convert the updated data to a downloadable Excel file
+        def to_excel(df):
+            output = io.BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+            writer.close()
+            processed_data = output.getvalue()
+            return processed_data
 
-        # Display the updated dataframe
-        if 'filtered_df' in st.session_state:
-            updated_filtered_df = pd.read_json(st.session_state['filtered_df'])
-            st.write("Updated Data:", updated_filtered_df)
+        updated_df = pd.DataFrame(filtered_df)
+        excel_data = to_excel(updated_df)
 
-            # Create the updated table with Handle, Name, Faction, and Beliefs columns
-            updated_table = updated_filtered_df[['Handle', 'Name', 'Faction', 'Beliefs']]
-            excel_data = to_excel(updated_table)
-
-            st.download_button(
-                label="Download Updated Data",
-                data=excel_data,
-                file_name='updated_data.xlsx',
-                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            )
-
-# Function to convert the updated data to a downloadable Excel file
-def to_excel(df):
-    output = io.BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index=False, sheet_name='Sheet1')
-    writer.close()
-    processed_data = output.getvalue()
-    return processed_data
+        st.download_button(
+            label="Download Updated Data",
+            data=excel_data,
+            file_name='updated_data.xlsx',
+            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
