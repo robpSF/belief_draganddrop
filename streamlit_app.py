@@ -14,6 +14,12 @@ belief1_right = f"{belief1}_Skeptic"
 belief2_top = f"{belief2}_Champion"
 belief2_bottom = f"{belief2}_Skeptic"
 
+# Define the labels for each quadrant
+quadrant1_label = f"{belief1_left} <> {belief2_top}"
+quadrant2_label = f"{belief1_right} <> {belief2_top}"
+quadrant3_label = f"{belief1_left} <> {belief2_bottom}"
+quadrant4_label = f"{belief1_right} <> {belief2_bottom}"
+
 # Define the drag-and-drop JavaScript and HTML
 drag_drop_html = f"""
 <!DOCTYPE html>
@@ -80,10 +86,10 @@ drag_drop_html = f"""
 <body>
 
 <div class="container">
-    <div id="quadrant1" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">Quadrant 1</div>
-    <div id="quadrant2" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">Quadrant 2</div>
-    <div id="quadrant3" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">Quadrant 3</div>
-    <div id="quadrant4" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">Quadrant 4</div>
+    <div id="quadrant1" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant1_label}</div>
+    <div id="quadrant2" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant2_label}</div>
+    <div id="quadrant3" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant3_label}</div>
+    <div id="quadrant4" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant4_label}</div>
 
     <div id="belief1_left" class="label">{belief1_left}</div>
     <div id="belief1_right" class="label">{belief1_right}</div>
