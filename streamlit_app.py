@@ -226,6 +226,6 @@ if uploaded_file:
 
         # Button to export the updated data
         if st.button("Export Updated Data"):
-            updated_df = pd.read_json(filtered_df)
-            updated_df.to_excel("updated_data.xlsx", index=False)
+            updated_df = pd.read_json(pd.DataFrame(filtered_df).to_json(orient='records'))
+            updated_df.to_excel("updated_data.xlsx", index=False, engine='xlsxwriter')
             st.success("Data exported successfully! Check the current directory for the 'updated_data.xlsx' file.")
