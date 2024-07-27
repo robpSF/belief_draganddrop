@@ -62,7 +62,7 @@ if uploaded_file:
                     grid-template-columns: 1fr 1fr;
                     grid-template-rows: 1fr 1fr;
                     gap: 10px;
-                    height: 400px;
+                    height: 500px;
                     position: relative;
                     margin-top: 50px;
                 }}
@@ -72,16 +72,16 @@ if uploaded_file:
                     padding: 10px;
                     text-align: center;
                     background-color: #f9f9f9;
-                    min-height: 100px;
+                    min-height: 200px;
                 }}
                 .draggable {{
-                    padding: 10px;
+                    padding: 5px;
                     margin: 5px;
                     background-color: #007bff;
                     color: #fff;
                     border-radius: 5px;
                     cursor: move;
-                    margin-top: 20px;
+                    width: 70px;
                     text-align: center;
                 }}
                 .label {{
