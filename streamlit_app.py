@@ -125,10 +125,10 @@ if uploaded_file:
         <body>
 
         <div class="container">
-            <div id="quadrant1" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant1_label}</div>
-            <div id="quadrant2" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant2_label}</div>
-            <div id="quadrant3" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant3_label}</div>
-            <div id="quadrant4" class="quadrant" ondrop="drop(event)" ondragover="allowDrop(event)">{quadrant4_label}</div>
+            <div id="quadrant1" class="quadrant" ondrop="drop(event, 'deepblue')" ondragover="allowDrop(event)">{quadrant1_label}</div>
+            <div id="quadrant2" class="quadrant" ondrop="drop(event, 'lightblue')" ondragover="allowDrop(event)">{quadrant2_label}</div>
+            <div id="quadrant3" class="quadrant" ondrop="drop(event, 'pink')" ondragover="allowDrop(event)">{quadrant3_label}</div>
+            <div id="quadrant4" class="quadrant" ondrop="drop(event, 'red')" ondragover="allowDrop(event)">{quadrant4_label}</div>
 
             <div id="belief1_left" class="label">{belief1_left}</div>
             <div id="belief1_right" class="label">{belief1_right}</div>
@@ -149,10 +149,25 @@ if uploaded_file:
                 event.dataTransfer.setData("text", event.target.id);
             }}
 
-            function drop(event) {{
+            function drop(event, color) {{
                 event.preventDefault();
                 var data = event.dataTransfer.getData("text");
-                event.target.appendChild(document.getElementById(data));
+                var element = document.getElementById(data);
+                event.target.appendChild(element);
+                switch(color) {{
+                    case 'deepblue':
+                        element.style.backgroundColor = '#00008b';
+                        break;
+                    case 'lightblue':
+                        element.style.backgroundColor = '#add8e6';
+                        break;
+                    case 'pink':
+                        element.style.backgroundColor = '#ffc0cb';
+                        break;
+                    case 'red':
+                        element.style.backgroundColor = '#ff0000';
+                        break;
+                }}
             }}
         </script>
 
