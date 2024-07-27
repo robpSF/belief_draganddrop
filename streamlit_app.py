@@ -27,6 +27,7 @@ drag_drop_html = f"""
             gap: 10px;
             height: 400px;
             position: relative;
+            margin-top: 50px;
         }}
         .quadrant {{
             border: 2px solid #ccc;
@@ -43,6 +44,7 @@ drag_drop_html = f"""
             color: #fff;
             border-radius: 5px;
             cursor: move;
+            margin-top: 20px;
         }}
         .label {{
             position: absolute;
@@ -50,13 +52,13 @@ drag_drop_html = f"""
             font-weight: bold;
         }}
         #belief1_left {{
-            left: -80px;
+            left: -100px;
             top: 50%;
             transform: translateY(-50%);
             text-align: left;
         }}
         #belief1_right {{
-            right: -80px;
+            right: -100px;
             top: 50%;
             transform: translateY(-50%);
             text-align: right;
