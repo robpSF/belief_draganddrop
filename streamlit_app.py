@@ -45,9 +45,10 @@ if uploaded_file:
         for index, row in filtered_df.iterrows():
             item_id = f"item{index}"
             name = row["Name"]
+            handle = row["Handle"]
             image_url = row["Image"]
             draggable_items_html += f"""
-            <div class="draggable" draggable="true" ondragstart="drag(event)" id="{item_id}">
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="{item_id}" data-handle="{handle}">
                 <img src="{image_url}" alt="{name}" width="50" height="50"><br>{name}
             </div>
             """
@@ -184,13 +185,15 @@ if uploaded_file:
                         element.style.backgroundColor = '#ff0000';
                         break;
                 }}
-                updateBeliefs(element.id, beliefs);
+                updateBeliefs(element.dataset.handle, beliefs);
             }}
 
-            function updateBeliefs(itemId, beliefs) {{
-                const itemIndex = parseInt(itemId.replace('item', ''), 10);
-                filtered_df[itemIndex].Beliefs = beliefs;
-                updateTable();
+            function updateBeliefs(handle, beliefs) {{
+                const itemIndex = filtered_df.findIndex(row => row.Handle === handle);
+                if (itemIndex !== -1) {{
+                    filtered_df[itemIndex].Beliefs = beliefs;
+                    updateTable();
+                }}
             }}
 
             function updateTable() {{
