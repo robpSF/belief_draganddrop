@@ -120,6 +120,19 @@ if uploaded_file:
                     transform: translateX(-50%);
                     text-align: center;
                 }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }}
+                th, td {{
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                }}
+                th {{
+                    background-color: #f2f2f2;
+                }}
             </style>
         </head>
         <body>
@@ -141,6 +154,8 @@ if uploaded_file:
         </div>
 
         <script>
+            let filtered_df = {filtered_df.to_json(orient='records')};
+
             function allowDrop(event) {{
                 event.preventDefault();
             }}
@@ -168,35 +183,35 @@ if uploaded_file:
                         element.style.backgroundColor = '#ff0000';
                         break;
                 }}
-                // Update the Beliefs column in the table
                 updateBeliefs(element.id, beliefs);
             }}
 
             function updateBeliefs(itemId, beliefs) {{
-                const itemIndex = itemId.replace('item', '');
+                const itemIndex = parseInt(itemId.replace('item', ''), 10);
                 filtered_df[itemIndex].Beliefs = beliefs;
                 updateTable();
             }}
 
             function updateTable() {{
                 const tableDiv = document.getElementById('updatedTable');
-                tableDiv.innerHTML = `<table>
+                let tableHTML = `<table>
                     <tr>
                         <th>Name</th>
                         <th>Faction</th>
                         <th>Beliefs</th>
-                    </tr>
-                    ${filtered_df.map(row => `
+                    </tr>`;
+                filtered_df.forEach(row => {{
+                    tableHTML += `
                         <tr>
-                            <td>${row.Name}</td>
-                            <td>${row.Faction}</td>
-                            <td>${row.Beliefs}</td>
-                        </tr>
-                    `).join('')}
-                </table>`;
+                            <td>${{row.Name}}</td>
+                            <td>${{row.Faction}}</td>
+                            <td>${{row.Beliefs}}</td>
+                        </tr>`;
+                }});
+                tableHTML += `</table>`;
+                tableDiv.innerHTML = tableHTML;
             }}
 
-            const filtered_df = {filtered_df.to_dict(orient='records')};
             document.addEventListener('DOMContentLoaded', updateTable);
         </script>
 
@@ -211,6 +226,6 @@ if uploaded_file:
 
         # Button to export the updated data
         if st.button("Export Updated Data"):
-            updated_df = pd.DataFrame(filtered_df)
+            updated_df = pd.read_json(filtered_df)
             updated_df.to_excel("updated_data.xlsx", index=False)
             st.success("Data exported successfully! Check the current directory for the 'updated_data.xlsx' file.")
