@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
+import io
 
 # Title of the app
 st.title("Drag and Drop Quadrant with Custom Axes")
@@ -224,8 +225,21 @@ if uploaded_file:
         # Display the drag-and-drop HTML/JS
         components.html(drag_drop_html, height=1200)
 
-        # Button to export the updated data
-        if st.button("Export Updated Data"):
-            updated_df = pd.read_json(pd.DataFrame(filtered_df).to_json(orient='records'))
-            updated_df.to_excel("updated_data.xlsx", index=False, engine='xlsxwriter')
-            st.success("Data exported successfully! Check the current directory for the 'updated_data.xlsx' file.")
+        # Convert the updated data to a downloadable Excel file
+        def to_excel(df):
+            output = io.BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+            writer.save()
+            processed_data = output.getvalue()
+            return processed_data
+
+        updated_df = pd.DataFrame(filtered_df)
+        excel_data = to_excel(updated_df)
+
+        st.download_button(
+            label="Download Updated Data",
+            data=excel_data,
+            file_name='updated_data.xlsx',
+            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
