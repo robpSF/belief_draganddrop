@@ -39,6 +39,18 @@ if uploaded_file:
         quadrant3_label = f"{belief1_left} <> {belief2_bottom}"
         quadrant4_label = f"{belief1_right} <> {belief2_bottom}"
 
+        # Create draggable items for each row in the filtered dataframe
+        draggable_items_html = ""
+        for index, row in filtered_df.iterrows():
+            item_id = f"item{index}"
+            name = row["Name"]
+            image_url = row["Image"]
+            draggable_items_html += f"""
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="{item_id}">
+                <img src="{image_url}" alt="{name}" width="50" height="50"><br>{name}
+            </div>
+            """
+
         # Define the drag-and-drop JavaScript and HTML
         drag_drop_html = f"""
         <!DOCTYPE html>
@@ -70,6 +82,7 @@ if uploaded_file:
                     border-radius: 5px;
                     cursor: move;
                     margin-top: 20px;
+                    text-align: center;
                 }}
                 .label {{
                     position: absolute;
@@ -116,8 +129,7 @@ if uploaded_file:
             <div id="belief2_bottom" class="label">{belief2_bottom}</div>
         </div>
 
-        <div class="draggable" draggable="true" ondragstart="drag(event)" id="item1">Item 1</div>
-        <div class="draggable" draggable="true" ondragstart="drag(event)" id="item2">Item 2</div>
+        {draggable_items_html}
 
         <script>
             function allowDrop(event) {{
@@ -140,4 +152,4 @@ if uploaded_file:
         """
 
         # Display the drag-and-drop HTML/JS
-        components.html(drag_drop_html, height=600)
+        components.html(drag_drop_html, height=800)
