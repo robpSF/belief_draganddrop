@@ -40,9 +40,13 @@ if uploaded_file:
         quadrant3_label = f"{belief1_left}, {belief2_bottom}"
         quadrant4_label = f"{belief1_right}, {belief2_bottom}"
 
+        # Initialize session state for the dataframe if not already set
+        if 'filtered_df' not in st.session_state:
+            st.session_state.filtered_df = filtered_df.to_dict(orient='records')
+
         # Create draggable items for each row in the filtered dataframe
         draggable_items_html = ""
-        for index, row in filtered_df.iterrows():
+        for index, row in enumerate(st.session_state.filtered_df):
             item_id = f"item{index}"
             name = row["Name"]
             image_url = row["Image"]
@@ -155,7 +159,7 @@ if uploaded_file:
         </div>
 
         <script>
-            let filtered_df = {filtered_df.to_json(orient='records')};
+            let filtered_df = {st.session_state.filtered_df};
 
             function allowDrop(event) {{
                 event.preventDefault();
@@ -191,6 +195,7 @@ if uploaded_file:
                 const itemIndex = parseInt(itemId.replace('item', ''), 10);
                 filtered_df[itemIndex].Beliefs = beliefs;
                 updateTable();
+                updateSessionState();
             }}
 
             function updateTable() {{
@@ -213,6 +218,11 @@ if uploaded_file:
                 tableDiv.innerHTML = tableHTML;
             }}
 
+            function updateSessionState() {{
+                // Send updated filtered_df back to Streamlit
+                window.parent.postMessage({{filtered_df: JSON.stringify(filtered_df)}}, "*");
+            }}
+
             document.addEventListener('DOMContentLoaded', updateTable);
         </script>
 
@@ -225,6 +235,10 @@ if uploaded_file:
         # Display the drag-and-drop HTML/JS
         components.html(drag_drop_html, height=1200)
 
+        # Update session state with data from the frontend
+        if 'filtered_df' in st.session_state:
+            filtered_df = pd.DataFrame(st.session_state.filtered_df)
+
         # Convert the updated data to a downloadable Excel file
         def to_excel(df):
             output = io.BytesIO()
@@ -234,8 +248,7 @@ if uploaded_file:
             processed_data = output.getvalue()
             return processed_data
 
-        updated_df = pd.DataFrame(filtered_df)
-        excel_data = to_excel(updated_df)
+        excel_data = to_excel(filtered_df)
 
         st.download_button(
             label="Download Updated Data",
