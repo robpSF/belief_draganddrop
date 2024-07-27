@@ -200,6 +200,7 @@ if uploaded_file:
                 const tableDiv = document.getElementById('updatedTable');
                 let tableHTML = `<table>
                     <tr>
+                        <th>Handle</th>
                         <th>Name</th>
                         <th>Faction</th>
                         <th>Beliefs</th>
@@ -207,6 +208,7 @@ if uploaded_file:
                 filtered_df.forEach(row => {{
                     tableHTML += `
                         <tr>
+                            <td>${{row.Handle}}</td>
                             <td>${{row.Name}}</td>
                             <td>${{row.Faction}}</td>
                             <td>${{row.Beliefs}}</td>
@@ -238,7 +240,14 @@ if uploaded_file:
             return processed_data
 
         updated_df = pd.DataFrame(filtered_df)
-        excel_data = to_excel(updated_df)
+
+        # Merge updated beliefs back into the original dataframe using the Handle column
+        df.set_index('Handle', inplace=True)
+        updated_df.set_index('Handle', inplace=True)
+        df.update(updated_df[['Beliefs']])
+        df.reset_index(inplace=True)
+
+        excel_data = to_excel(df)
 
         st.download_button(
             label="Download Updated Data",
