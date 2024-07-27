@@ -25,7 +25,7 @@ if uploaded_file:
 
         # Step 3: Enter axes of uncertainty and continue with the program
         belief1 = st.text_input("Enter Belief 1 (left-right axis):", "#Defence")
-        belief2 = st.text_input("Enter Belief 2 (top-bottom axis):", "#Defence")
+        belief2 = st.text_input("Enter Belief 2 (top-bottom axis):", "#Alliances")
 
         # Generate labels for the quadrants based on the input
         belief1_left = f"{belief1}_Champion"
@@ -34,10 +34,10 @@ if uploaded_file:
         belief2_bottom = f"{belief2}_Skeptic"
 
         # Define the labels for each quadrant
-        quadrant1_label = f"{belief1_left} <> {belief2_top}"
-        quadrant2_label = f"{belief1_right} <> {belief2_top}"
-        quadrant3_label = f"{belief1_left} <> {belief2_bottom}"
-        quadrant4_label = f"{belief1_right} <> {belief2_bottom}"
+        quadrant1_label = f"{belief1_left}, {belief2_top}"
+        quadrant2_label = f"{belief1_right}, {belief2_top}"
+        quadrant3_label = f"{belief1_left}, {belief2_bottom}"
+        quadrant4_label = f"{belief1_right}, {belief2_bottom}"
 
         # Create draggable items for each row in the filtered dataframe
         draggable_items_html = ""
@@ -125,10 +125,10 @@ if uploaded_file:
         <body>
 
         <div class="container">
-            <div id="quadrant1" class="quadrant" ondrop="drop(event, 'deepblue')" ondragover="allowDrop(event)">{quadrant1_label}</div>
-            <div id="quadrant2" class="quadrant" ondrop="drop(event, 'lightblue')" ondragover="allowDrop(event)">{quadrant2_label}</div>
-            <div id="quadrant3" class="quadrant" ondrop="drop(event, 'pink')" ondragover="allowDrop(event)">{quadrant3_label}</div>
-            <div id="quadrant4" class="quadrant" ondrop="drop(event, 'red')" ondragover="allowDrop(event)">{quadrant4_label}</div>
+            <div id="quadrant1" class="quadrant" ondrop="drop(event, 'deepblue', '{belief1_left}, {belief2_top}')" ondragover="allowDrop(event)">{quadrant1_label}</div>
+            <div id="quadrant2" class="quadrant" ondrop="drop(event, 'lightblue', '{belief1_right}, {belief2_top}')" ondragover="allowDrop(event)">{quadrant2_label}</div>
+            <div id="quadrant3" class="quadrant" ondrop="drop(event, 'pink', '{belief1_left}, {belief2_bottom}')" ondragover="allowDrop(event)">{quadrant3_label}</div>
+            <div id="quadrant4" class="quadrant" ondrop="drop(event, 'red', '{belief1_right}, {belief2_bottom}')" ondragover="allowDrop(event)">{quadrant4_label}</div>
 
             <div id="belief1_left" class="label">{belief1_left}</div>
             <div id="belief1_right" class="label">{belief1_right}</div>
@@ -149,7 +149,7 @@ if uploaded_file:
                 event.dataTransfer.setData("text", event.target.id);
             }}
 
-            function drop(event, color) {{
+            function drop(event, color, beliefs) {{
                 event.preventDefault();
                 var data = event.dataTransfer.getData("text");
                 var element = document.getElementById(data);
@@ -168,12 +168,49 @@ if uploaded_file:
                         element.style.backgroundColor = '#ff0000';
                         break;
                 }}
+                // Update the Beliefs column in the table
+                updateBeliefs(element.id, beliefs);
             }}
+
+            function updateBeliefs(itemId, beliefs) {{
+                const itemIndex = itemId.replace('item', '');
+                filtered_df[itemIndex].Beliefs = beliefs;
+                updateTable();
+            }}
+
+            function updateTable() {{
+                const tableDiv = document.getElementById('updatedTable');
+                tableDiv.innerHTML = `<table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Faction</th>
+                        <th>Beliefs</th>
+                    </tr>
+                    ${filtered_df.map(row => `
+                        <tr>
+                            <td>${row.Name}</td>
+                            <td>${row.Faction}</td>
+                            <td>${row.Beliefs}</td>
+                        </tr>
+                    `).join('')}
+                </table>`;
+            }}
+
+            const filtered_df = {filtered_df.to_dict(orient='records')};
+            document.addEventListener('DOMContentLoaded', updateTable);
         </script>
+
+        <div id="updatedTable" style="margin-top: 20px;"></div>
 
         </body>
         </html>
         """
 
         # Display the drag-and-drop HTML/JS
-        components.html(drag_drop_html, height=800)
+        components.html(drag_drop_html, height=1200)
+
+        # Button to export the updated data
+        if st.button("Export Updated Data"):
+            updated_df = pd.DataFrame(filtered_df)
+            updated_df.to_excel("updated_data.xlsx", index=False)
+            st.success("Data exported successfully! Check the current directory for the 'updated_data.xlsx' file.")
